@@ -4,40 +4,68 @@ import sqlite3
 class Database:
 
     def __init__(self):
-        self.connection = sqlite3.connect("expense_tracker.db")
+
+        self.connection = sqlite3.connect(
+            "expense_tracker.db"
+        )
+
         self.create_tables()
 
     def create_tables(self):
+
         cursor = self.connection.cursor()
 
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS expenses(
+
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+
                 title TEXT NOT NULL,
+
                 amount REAL NOT NULL,
+
                 category TEXT,
+
                 date TEXT,
+
                 description TEXT
+
             )
         """)
 
         self.connection.commit()
 
-    def add_expense(self, title, amount, category, date, description):
+    def add_expense(
+        self,
+        title,
+        amount,
+        category,
+        date,
+        description
+    ):
 
         cursor = self.connection.cursor()
 
         cursor.execute("""
             INSERT INTO expenses
-            (title, amount, category, date, description)
+            (
+                title,
+                amount,
+                category,
+                date,
+                description
+            )
+
             VALUES (?, ?, ?, ?, ?)
-        """, (
-            title,
-            amount,
-            category,
-            date,
-            description
-        ))
+
+        """,
+                       (
+                           title,
+                           amount,
+                           category,
+                           date,
+                           description
+                       ))
 
         self.connection.commit()
 
@@ -47,14 +75,18 @@ class Database:
 
         cursor.execute("""
             SELECT
+
                 id,
                 title,
                 amount,
                 category,
                 date,
                 description
+
             FROM expenses
+
             ORDER BY id DESC
+
         """)
 
         return cursor.fetchall()
@@ -75,32 +107,47 @@ class Database:
             UPDATE expenses
 
             SET
+
                 title=?,
+
                 amount=?,
+
                 category=?,
+
                 date=?,
+
                 description=?
 
             WHERE id=?
-        """, (
-            title,
-            amount,
-            category,
-            date,
-            description,
-            expense_id
-        ))
+
+        """,
+                       (
+                           title,
+                           amount,
+                           category,
+                           date,
+                           description,
+                           expense_id
+                       ))
 
         self.connection.commit()
 
-    def delete_expense(self, expense_id):
+    def delete_expense(
+        self,
+        expense_id
+    ):
 
         cursor = self.connection.cursor()
 
         cursor.execute("""
             DELETE FROM expenses
+
             WHERE id=?
-        """, (expense_id,))
+
+        """,
+                       (
+                           expense_id,
+                       ))
 
         self.connection.commit()
 
@@ -110,7 +157,9 @@ class Database:
 
         cursor.execute("""
             SELECT COUNT(*)
+
             FROM expenses
+
         """)
 
         return cursor.fetchone()[0]
@@ -121,7 +170,9 @@ class Database:
 
         cursor.execute("""
             SELECT IFNULL(SUM(amount),0)
+
             FROM expenses
+
         """)
 
         return cursor.fetchone()[0]
@@ -132,10 +183,14 @@ class Database:
 
         cursor.execute("""
             SELECT COUNT(DISTINCT category)
+
             FROM expenses
+
         """)
 
         return cursor.fetchone()[0]
+
+    # Used by Pie Chart and Category Bar Chart
 
     def get_category_summary(self):
 
@@ -143,11 +198,42 @@ class Database:
 
         cursor.execute("""
             SELECT
+
                 category,
+
                 SUM(amount)
+
             FROM expenses
+
             GROUP BY category
-            ORDER BY SUM(amount) DESC
+
         """)
 
         return cursor.fetchall()
+
+    # Used by Monthly Expense Chart
+
+    def get_monthly_summary(self):
+
+        cursor = self.connection.cursor()
+
+        cursor.execute("""
+            SELECT
+
+                substr(date,1,7),
+
+                SUM(amount)
+
+            FROM expenses
+
+            GROUP BY substr(date,1,7)
+
+            ORDER BY substr(date,1,7)
+
+        """)
+
+        return cursor.fetchall()
+
+    def close(self):
+
+        self.connection.close()
