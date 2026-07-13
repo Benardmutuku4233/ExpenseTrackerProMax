@@ -66,6 +66,20 @@ class ExpensePage(QWidget):
         layout.addWidget(self.description_input)
 
         self.save_button = QPushButton("Save Expense")
+
+        self.save_button.setStyleSheet("""
+    QPushButton {
+        background-color: #2563EB;
+        color: white;
+        border-radius: 8px;
+        padding: 10px 18px;
+        font-weight: bold;
+    }
+
+    QPushButton:hover {
+        background-color: #1D4ED8;
+    }
+""")
         self.save_button.clicked.connect(self.save_expense)
 
         layout.addWidget(self.save_button)

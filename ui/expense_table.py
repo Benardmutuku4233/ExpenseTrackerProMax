@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
 class ExpenseTable(QTableWidget):
 
     def __init__(self):
+
         super().__init__()
 
         self.edit_callback = None
@@ -35,7 +36,45 @@ class ExpenseTable(QTableWidget):
             QHeaderView.Stretch
         )
 
+        self.verticalHeader().setDefaultSectionSize(
+            45
+        )
+
         self.setAlternatingRowColors(True)
+
+        self.setStyleSheet("""
+            
+            QTableWidget {
+                background-color:white;
+                color:#0F172A;
+                alternate-background-color:#EFF6FF;
+            }
+
+
+            QTableWidget::item:hover {
+                background-color:transparent;
+            }
+
+
+            QTableWidget::item:selected {
+                background-color:transparent;
+                color:#0F172A;
+            }
+
+
+            QHeaderView::section {
+
+                background-color:#0B2A4A;
+
+                color:white;
+
+                padding:8px;
+
+                font-weight:bold;
+
+            }
+
+        """)
 
     def load_data(self, expenses):
 
@@ -45,15 +84,52 @@ class ExpenseTable(QTableWidget):
 
             self.insertRow(row)
 
+            expense_id = expense[0]
+
             for column in range(6):
+
+                item = QTableWidgetItem(
+                    str(expense[column])
+                )
 
                 self.setItem(
                     row,
                     column,
-                    QTableWidgetItem(str(expense[column]))
+                    item
                 )
 
-            edit_button = QPushButton("Edit")
+            edit_button = QPushButton(
+                "Edit"
+            )
+
+            edit_button.setFixedHeight(
+                32
+            )
+
+            edit_button.setStyleSheet("""
+                
+                QPushButton {
+
+                    background-color:#2563EB;
+
+                    color:white;
+
+                    border-radius:6px;
+
+                    padding:5px 12px;
+
+                    font-weight:bold;
+
+                }
+
+
+                QPushButton:hover {
+
+                    background-color:#1D4ED8;
+
+                }
+
+            """)
 
             edit_button.clicked.connect(
                 lambda checked=False, e=expense:
@@ -66,10 +142,41 @@ class ExpenseTable(QTableWidget):
                 edit_button
             )
 
-            delete_button = QPushButton("Delete")
+            delete_button = QPushButton(
+                "Delete"
+            )
+
+            delete_button.setFixedHeight(
+                32
+            )
+
+            delete_button.setStyleSheet("""
+                
+                QPushButton {
+
+                    background-color:#DC2626;
+
+                    color:white;
+
+                    border-radius:6px;
+
+                    padding:5px 12px;
+
+                    font-weight:bold;
+
+                }
+
+
+                QPushButton:hover {
+
+                    background-color:#B91C1C;
+
+                }
+
+            """)
 
             delete_button.clicked.connect(
-                lambda checked=False, i=expense[0]:
+                lambda checked=False, i=expense_id:
                 self.delete(i)
             )
 
@@ -82,9 +189,15 @@ class ExpenseTable(QTableWidget):
     def edit_expense(self, expense):
 
         if self.edit_callback:
-            self.edit_callback(expense)
+
+            self.edit_callback(
+                expense
+            )
 
     def delete(self, expense_id):
 
         if self.delete_callback:
-            self.delete_callback(expense_id)
+
+            self.delete_callback(
+                expense_id
+            )
