@@ -136,3 +136,18 @@ class Database:
         """)
 
         return cursor.fetchone()[0]
+
+    def get_category_summary(self):
+
+        cursor = self.connection.cursor()
+
+        cursor.execute("""
+            SELECT
+                category,
+                SUM(amount)
+            FROM expenses
+            GROUP BY category
+            ORDER BY SUM(amount) DESC
+        """)
+
+        return cursor.fetchall()

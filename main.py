@@ -7,12 +7,11 @@ from ui.main_window import MainWindow
 
 
 def main():
+
     app = QApplication(sys.argv)
 
-    # Create one shared database instance
     database = Database()
 
-    # Create the main window
     window = MainWindow(database)
     window.show()
 

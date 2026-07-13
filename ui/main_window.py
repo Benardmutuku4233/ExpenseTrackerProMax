@@ -1,13 +1,14 @@
 from PySide6.QtWidgets import (
     QMainWindow,
     QStackedWidget,
-    QToolBar
+    QToolBar,
 )
 
 from PySide6.QtGui import QAction
 
-from ui.expense_page import ExpensePage
-from ui.dashboard_page import DashboardPage
+from ui.pages.dashboard_page import DashboardPage
+from ui.pages.expense_page import ExpensePage
+from ui.pages.reports_page import ReportsPage
 
 
 class MainWindow(QMainWindow):
@@ -17,9 +18,8 @@ class MainWindow(QMainWindow):
 
         self.database = database
 
-        self.setWindowTitle("Expense Tracker Pro")
-
-        self.resize(1100, 700)
+        self.setWindowTitle("Expense Tracker Pro Max")
+        self.resize(1200, 750)
 
         self.create_pages()
         self.create_menu()
@@ -27,18 +27,22 @@ class MainWindow(QMainWindow):
 
         self.statusBar().showMessage("Ready")
 
+        self.show_dashboard()
+
     def create_pages(self):
 
         self.stack = QStackedWidget()
 
         self.dashboard_page = DashboardPage(self.database)
         self.expense_page = ExpensePage(self.database)
+        self.reports_page = ReportsPage(self.database)
 
         self.dashboard_page.edit_callback = self.open_edit_page
-        self.expense_page.refresh_callback = self.dashboard_page.refresh
+        self.expense_page.refresh_callback = self.refresh_pages
 
         self.stack.addWidget(self.dashboard_page)
         self.stack.addWidget(self.expense_page)
+        self.stack.addWidget(self.reports_page)
 
         self.setCentralWidget(self.stack)
 
@@ -50,42 +54,52 @@ class MainWindow(QMainWindow):
 
         exit_action = QAction("Exit", self)
         exit_action.triggered.connect(self.close)
-
         file_menu.addAction(exit_action)
 
         view_menu = menu.addMenu("View")
 
-        dashboard = QAction("Dashboard", self)
-        dashboard.triggered.connect(self.show_dashboard)
+        dashboard_action = QAction("Dashboard", self)
+        dashboard_action.triggered.connect(self.show_dashboard)
 
-        expense = QAction("Add Expense", self)
-        expense.triggered.connect(self.show_expense_page)
+        expense_action = QAction("Expenses", self)
+        expense_action.triggered.connect(self.show_expense_page)
 
-        view_menu.addAction(dashboard)
-        view_menu.addAction(expense)
+        reports_action = QAction("Reports", self)
+        reports_action.triggered.connect(self.show_reports)
+
+        view_menu.addAction(dashboard_action)
+        view_menu.addAction(expense_action)
+        view_menu.addAction(reports_action)
 
     def create_toolbar(self):
 
-        toolbar = QToolBar()
-
+        toolbar = QToolBar("Main Toolbar")
         self.addToolBar(toolbar)
 
-        dashboard = QAction("Dashboard", self)
-        dashboard.triggered.connect(self.show_dashboard)
+        dashboard_action = QAction("Dashboard", self)
+        dashboard_action.triggered.connect(self.show_dashboard)
 
-        expense = QAction("Add Expense", self)
-        expense.triggered.connect(self.show_expense_page)
+        expense_action = QAction("Expenses", self)
+        expense_action.triggered.connect(self.show_expense_page)
 
-        toolbar.addAction(dashboard)
-        toolbar.addAction(expense)
+        reports_action = QAction("Reports", self)
+        reports_action.triggered.connect(self.show_reports)
+
+        toolbar.addAction(dashboard_action)
+        toolbar.addAction(expense_action)
+        toolbar.addAction(reports_action)
+
+    def refresh_pages(self):
+
+        self.dashboard_page.refresh()
+
+        if hasattr(self.reports_page, "refresh"):
+            self.reports_page.refresh()
 
     def show_dashboard(self):
 
         self.dashboard_page.refresh()
-
-        self.stack.setCurrentWidget(
-            self.dashboard_page
-        )
+        self.stack.setCurrentWidget(self.dashboard_page)
 
     def show_expense_page(self):
 
@@ -93,14 +107,16 @@ class MainWindow(QMainWindow):
         self.expense_page.editing_id = None
         self.expense_page.save_button.setText("Save Expense")
 
-        self.stack.setCurrentWidget(
-            self.expense_page
-        )
+        self.stack.setCurrentWidget(self.expense_page)
+
+    def show_reports(self):
+
+        if hasattr(self.reports_page, "refresh"):
+            self.reports_page.refresh()
+
+        self.stack.setCurrentWidget(self.reports_page)
 
     def open_edit_page(self, expense):
 
         self.expense_page.load_expense(expense)
-
-        self.stack.setCurrentWidget(
-            self.expense_page
-        )
+        self.stack.setCurrentWidget(self.expense_page)

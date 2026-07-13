@@ -45,9 +45,6 @@ class ExpenseTable(QTableWidget):
 
             self.insertRow(row)
 
-            expense_id = expense[0]
-
-            # Data columns
             for column in range(6):
 
                 self.setItem(
@@ -56,11 +53,11 @@ class ExpenseTable(QTableWidget):
                     QTableWidgetItem(str(expense[column]))
                 )
 
-            # Edit button
             edit_button = QPushButton("Edit")
 
             edit_button.clicked.connect(
-                lambda checked=False, e=expense: self.edit_expense(e)
+                lambda checked=False, e=expense:
+                self.edit_expense(e)
             )
 
             self.setCellWidget(
@@ -69,26 +66,25 @@ class ExpenseTable(QTableWidget):
                 edit_button
             )
 
-            # Delete button
             delete_button = QPushButton("Delete")
 
             delete_button.clicked.connect(
-                lambda checked=False, i=expense_id: self.delete(i)
+                lambda checked=False, i=expense[0]:
+                self.delete(i)
             )
 
             self.setCellWidget(
                 row,
                 7,
-                delete_button)
+                delete_button
+            )
 
     def edit_expense(self, expense):
 
         if self.edit_callback:
-
             self.edit_callback(expense)
 
     def delete(self, expense_id):
 
         if self.delete_callback:
-
             self.delete_callback(expense_id)

@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
     QFrame,
     QMessageBox
 )
+from PySide6.QtCore import Qt
 
 from ui.expense_table import ExpenseTable
 
@@ -16,60 +17,64 @@ class DashboardPage(QWidget):
         super().__init__()
 
         self.database = database
-
         self.edit_callback = None
 
         self.build_ui()
 
-    def card(self, title):
+    def create_card(self, title):
 
         frame = QFrame()
 
         frame.setStyleSheet("""
             QFrame{
                 background:white;
-                border:1px solid lightgray;
+                border:1px solid #d9d9d9;
                 border-radius:10px;
+                padding:12px;
             }
         """)
 
         layout = QVBoxLayout(frame)
 
-        layout.addWidget(QLabel(title))
+        title_label = QLabel(title)
+        title_label.setAlignment(Qt.AlignCenter)
 
-        value = QLabel("0")
+        value_label = QLabel("0")
+        value_label.setAlignment(Qt.AlignCenter)
 
-        value.setStyleSheet("""
-            font-size:22px;
+        value_label.setStyleSheet("""
+            font-size:24px;
             font-weight:bold;
+            color:#1565C0;
         """)
 
-        layout.addWidget(value)
+        layout.addWidget(title_label)
+        layout.addWidget(value_label)
 
-        return frame, value
+        return frame, value_label
 
     def build_ui(self):
 
-        main = QVBoxLayout(self)
+        main_layout = QVBoxLayout(self)
 
-        cards = QHBoxLayout()
+        cards_layout = QHBoxLayout()
 
-        c1, self.total_expenses = self.card("Total Expenses")
-        c2, self.total_amount = self.card("Total Amount")
-        c3, self.total_categories = self.card("Categories")
+        card1, self.total_expenses = self.create_card("Total Expenses")
+        card2, self.total_amount = self.create_card("Total Amount")
+        card3, self.total_categories = self.create_card("Categories")
 
-        cards.addWidget(c1)
-        cards.addWidget(c2)
-        cards.addWidget(c3)
+        cards_layout.addWidget(card1)
+        cards_layout.addWidget(card2)
+        cards_layout.addWidget(card3)
 
-        main.addLayout(cards)
+        main_layout.addLayout(cards_layout)
 
         self.table = ExpenseTable()
 
         self.table.edit_callback = self.edit_expense
         self.table.delete_callback = self.delete_expense
 
-        main.addWidget(self.table)
+        main_layout.addWidget(self.table)
 
         self.refresh()
 
@@ -98,13 +103,13 @@ class DashboardPage(QWidget):
 
     def delete_expense(self, expense_id):
 
-        answer = QMessageBox.question(
+        reply = QMessageBox.question(
             self,
-            "Delete",
-            "Delete this expense?"
+            "Delete Expense",
+            "Are you sure you want to delete this expense?"
         )
 
-        if answer == QMessageBox.Yes:
+        if reply == QMessageBox.Yes:
 
             self.database.delete_expense(expense_id)
 

@@ -12,8 +12,6 @@ from PySide6.QtWidgets import (
 
 from PySide6.QtCore import QDate
 
-from models.expense import Expense
-
 
 class ExpensePage(QWidget):
 
@@ -22,10 +20,9 @@ class ExpensePage(QWidget):
 
         self.database = database
         self.editing_id = None
+        self.refresh_callback = None
 
         self.create_ui()
-
-        self.refresh_callback = None
 
     def create_ui(self):
 
@@ -49,6 +46,9 @@ class ExpensePage(QWidget):
             "Transport",
             "Bills",
             "Shopping",
+            "Entertainment",
+            "Healthcare",
+            "Education",
             "Other"
         ])
         layout.addWidget(self.category_input)
@@ -69,7 +69,6 @@ class ExpensePage(QWidget):
         self.save_button.clicked.connect(self.save_expense)
 
         layout.addWidget(self.save_button)
-
         layout.addStretch()
 
         self.setLayout(layout)
@@ -79,7 +78,7 @@ class ExpensePage(QWidget):
         title = self.title_input.text().strip()
         amount = self.amount_input.text().strip()
 
-        if title == "" or amount == "":
+        if not title or not amount:
             QMessageBox.warning(
                 self,
                 "Missing Information",
@@ -93,7 +92,7 @@ class ExpensePage(QWidget):
             QMessageBox.warning(
                 self,
                 "Invalid Amount",
-                "Amount must be numeric."
+                "Amount must be a number."
             )
             return
 
@@ -103,20 +102,12 @@ class ExpensePage(QWidget):
 
         if self.editing_id is None:
 
-            expense = Expense(
+            self.database.add_expense(
                 title,
                 amount,
                 category,
                 date,
                 description
-            )
-
-            self.database.add_expense(
-                expense.title,
-                expense.amount,
-                expense.category,
-                expense.date,
-                expense.description
             )
 
             QMessageBox.information(
@@ -155,9 +146,7 @@ class ExpensePage(QWidget):
         self.editing_id = expense[0]
 
         self.title_input.setText(expense[1])
-
         self.amount_input.setText(str(expense[2]))
-
         self.category_input.setCurrentText(expense[3])
 
         self.date_input.setDate(
@@ -176,5 +165,6 @@ class ExpensePage(QWidget):
         self.title_input.clear()
         self.amount_input.clear()
         self.description_input.clear()
+
         self.category_input.setCurrentIndex(0)
         self.date_input.setDate(QDate.currentDate())
